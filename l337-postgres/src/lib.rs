@@ -2,10 +2,13 @@
 // #![deny(missing_docs, missing_debug_implementations)]
 
 use futures::sync::oneshot;
-use futures::{Async, Future};
+use futures::{Async, Future, Stream as _};
 use tokio::executor::spawn;
 use tokio_postgres::error::Error;
-use tokio_postgres::{Client, MakeTlsConnect, Socket, TlsConnect};
+use tokio_postgres::{
+    tls::{MakeTlsConnect, TlsConnect},
+    Client, Socket,
+};
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -72,7 +75,13 @@ where
         mut conn: Self::Connection,
     ) -> Box<Future<Item = (), Error = l337::Error<Self::Error>>> {
         // If we can execute this without erroring, we're definitely still connected to the datbase
-        Box::new(conn.client.batch_execute("").map_err(l337::Error::External))
+        Box::new(
+            conn.client
+                .simple_query("")
+                .into_future()
+                .map(|_| ())
+                .map_err(|(e, _)| l337::Error::External(e)),
+        )
     }
 
     fn has_broken(&self, conn: &mut Self::Connection) -> bool {

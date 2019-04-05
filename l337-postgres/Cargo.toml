@@ -8,4 +8,4 @@ edition = "2018"
 l337 = { path = ".." }
 futures = "0.1"
 tokio = "0.1"
-tokio-postgres = { git = "https://github.com/sfackler/rust-postgres.git", rev = "e3f2eb72444e3b3fe75599bb660cb625cb9752df" }
+tokio-postgres = "0.4.0-rc.2"
